@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MEGA File Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    .tabs {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .tab {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+    }
+    .tab.active {
+      background: white;
+      color: #667eea;
+      border-bottom: 3px solid #667eea;
+    }
+    .tab-content {
+      display: none;
+      padding: 30px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .upload-section {
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .upload-form {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    input[type="file"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px;
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .btn-secondary {
+      background: #28a745;
+    }
+    .btn-danger {
+      background: #dc3545;
+    }
+    .files-list {
+      margin-top: 20px;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    .file-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    .file-icon {
+      font-size: 32px;
+      margin-right: 15px;
+      width: 40px;
+      text-align: center;
+    }
+    .file-info {
+      flex: 1;
+    }
+    .file-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .file-size {
+      color: #666;
+      font-size: 14px;
+    }
+    .file-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .folder-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 10px;
+      background: #fff3cd;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+    }
+    .create-folder {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .create-folder input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    #message {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .refresh-btn {
+      background: #17a2b8;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📁 MEGA File Manager</h1>
+      <p>Manage your files on MEGA</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('upload')">⬆️ Upload</button>
+      <button class="tab" onclick="showTab('files')">📂 Files</button>
+      <button class="tab" onclick="showTab('folder')">📁 Create Folder</button>
+    </div>
+
+    <div id="upload-tab" class="tab-content active">
+      <div class="upload-section">
+        <h2>Upload file to MEGA</h2>
+        <form id="uploadForm" class="upload-form">
+          <input type="file" name="file" id="fileInput" required>
+          <button type="submit">Upload</button>
+        </form>
+        <div id="uploadMessage"></div>
+      </div>
+    </div>
+
+    <div id="files-tab" class="tab-content">
+      <button class="refresh-btn" onclick="loadFiles()">🔄 Refresh List</button>
+      
+      <div class="create-folder">
+        <input type="text" id="folderName" placeholder="Enter folder name">
+        <button class="btn-secondary" onclick="createFolder()">Create Folder</button>
+      </div>
+
+      <div id="filesList" class="files-list">
+        <div class="loading">Loading files...</div>
+      </div>
+    </div>
+
+    <div id="folder-tab" class="tab-content">
+      <h2>Create New Folder</h2>
+      <div class="create-folder">
+        <input type="text" id="newFolderName" placeholder="Enter folder name">
+        <button class="btn-secondary" onclick="createFolderFromTab()">Create Folder</button>
+      </div>
+      <div id="folderMessage"></div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabName === 'files') {
+        loadFiles();
+      }
+    }
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      const fileInput = document.getElementById('fileInput');
+      const messageDiv = document.getElementById('uploadMessage');
+      
+      if (!fileInput.files[0]) {
+        messageDiv.textContent = 'Please select a file';
+        messageDiv.className = 'error';
+        return;
+      }
+
+      formData.append('file', fileInput.files[0]);
+      messageDiv.textContent = 'Uploading...';
+      messageDiv.className = '';
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await response.text();
+        
+        if (response.ok) {
+          messageDiv.textContent = text;
+          messageDiv.className = 'success';
+          fileInput.value = '';
+          if (document.getElementById('files-tab').classList.contains('active')) {
+            loadFiles();
+          }
+        } else {
+          messageDiv.textContent = text || 'Upload error';
+          messageDiv.className = 'error';
+        }
+      } catch (error) {
+        messageDiv.textContent = 'Error: ' + error.message;
+        messageDiv.className = 'error';
+      }
+    });
+
+    async function loadFiles() {
+      const filesList = document.getElementById('filesList');
+      filesList.innerHTML = '<div class="loading">Loading files...</div>';
+
+      try {
+        const response = await fetch('/api/files');
+        
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error('Server returned non-JSON. Server may not be running or route not found.');
+        } else {
+          data = await response.json();
+        }
+
+        if (response.ok) {
+          let html = '';
+
+          if (data.folders && data.folders.length > 0) {
+            data.folders.forEach(folder => {
+              html += `
+                <div class="folder-item">
+                  <div class="file-icon">📁</div>
+                  <div class="file-info">
+                    <div class="file-name">${folder.name}</div>
+                    <div class="file-size">Folder</div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+
+          if (data.files && data.files.length > 0) {
+            data.files.forEach(file => {
+              const size = formatFileSize(file.size);
+              html += `
+                <div class="file-item">
+                  <div class="file-icon">📄</div>
+                  <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${size}</div>
+                  </div>
+                  <div class="file-actions">
+                    <button class="btn-secondary" onclick="downloadFile('${file.id}', '${file.name}')">⬇️ Download</button>
+                  </div>
+                </div>
+              `;
+            });
+          }
+
+          if (!html) {
+            html = '<div class="loading">No files found</div>';
+          }
+
+          filesList.innerHTML = html;
+        } else {
+          filesList.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+        }
+      } catch (error) {
+        filesList.innerHTML = `<div class="error">Loading error: ${error.message}</div>`;
+      }
+    }
+
+    function downloadFile(fileId, fileName) {
+      window.open(`/api/download/${fileId}`, '_blank');
+    }
+
+    async function createFolder() {
+      const folderName = document.getElementById('folderName').value.trim();
+      if (!folderName) {
+        alert('Enter folder name');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/folder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: folderName })
+        });
+
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error('Server returned non-JSON. Check if server is running.');
+        } else {
+          data = await response.json();
+        }
+
+        if (response.ok) {
+          document.getElementById('folderName').value = '';
+          loadFiles();
+          alert('Folder created successfully!');
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+
+    async function createFolderFromTab() {
+      const folderName = document.getElementById('newFolderName').value.trim();
+      const messageDiv = document.getElementById('folderMessage');
+      
+      if (!folderName) {
+        messageDiv.textContent = 'Enter folder name';
+        messageDiv.className = 'error';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/folder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: folderName })
+        });
+
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error('Server returned non-JSON. Check if server is running.');
+        } else {
+          data = await response.json();
+        }
+
+        if (response.ok) {
+          messageDiv.textContent = data.message;
+          messageDiv.className = 'success';
+          document.getElementById('newFolderName').value = '';
+          loadFiles();
+        } else {
+          messageDiv.textContent = 'Error: ' + (data.error || 'Unknown error');
+          messageDiv.className = 'error';
+        }
+      } catch (error) {
+        messageDiv.textContent = 'Error: ' + error.message;
+        messageDiv.className = 'error';
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    window.addEventListener('load', () => {
+      if (document.getElementById('files-tab').classList.contains('active')) {
+        loadFiles();
+      }
+    });
+  </script>
+</body>
+</html>

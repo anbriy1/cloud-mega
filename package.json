@@ -1,0 +1,12 @@
+{
+  "name": "my-mega-upload",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.21.2",
+    "formidable": "^2.1.5",
+    "megajs": "^1.3.9"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
