@@ -1,29 +1,22 @@
 {
-  "version": 2,
   "builds": [
     {
       "src": "vercel.js",
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/vercel.js"
-    },
-    {
-      "src": "/upload",
-      "dest": "/vercel.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
-    }
-  ],
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/vercel.js"
+    },
+    {
+      "source": "/upload",
+      "destination": "/vercel.js"
+    },
+    {
       "source": "/",
-      "destination": "/public/login.html"
+      "destination": "/login.html"
     }
   ]
 }
