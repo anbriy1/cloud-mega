@@ -154,12 +154,9 @@
       border-radius: 8px;
       border-left: 4px solid #ffc107;
     }
-<<<<<<< HEAD
-=======
     .folder-item button {
       margin-left: auto;
     }
->>>>>>> 7257c02 (Version-2)
     .create-folder {
       display: flex;
       gap: 10px;
@@ -204,8 +201,6 @@
     <div class="header">
       <h1>📁 MEGA File Manager</h1>
       <p>Manage your files on MEGA</p>
-<<<<<<< HEAD
-=======
       <div id="authPanel" style="margin-top:10px;">
         <span id="authEmail" style="font-weight:600;"></span>
         <button class="btn-secondary" id="reauthBtn" style="margin-left:10px;">Re-auth</button>
@@ -215,7 +210,6 @@
         <button id="toRootBtn" class="btn-secondary">Go to Root</button>
         <span id="currentPath" style="margin-left:10px; font-weight:600;"></span>
       </div>
->>>>>>> 7257c02 (Version-2)
     </div>
 
     <div class="tabs">
@@ -259,8 +253,6 @@
   </div>
 
   <script>
-<<<<<<< HEAD
-=======
     let currentFolderId = '';
     let currentPathNames = ['Root'];
     function getToken() {
@@ -281,7 +273,6 @@
       document.getElementById('currentPath').textContent = currentPathNames.join(' / ');
     }
 
->>>>>>> 7257c02 (Version-2)
     function showTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -299,10 +290,7 @@
     }
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-<<<<<<< HEAD
-=======
       if (!ensureAuthOrRedirect()) return;
->>>>>>> 7257c02 (Version-2)
       const formData = new FormData();
       const fileInput = document.getElementById('fileInput');
       const messageDiv = document.getElementById('uploadMessage');
@@ -314,24 +302,18 @@
       }
 
       formData.append('file', fileInput.files[0]);
-<<<<<<< HEAD
-=======
       if (currentFolderId) {
         formData.append('folderId', currentFolderId);
       }
->>>>>>> 7257c02 (Version-2)
       messageDiv.textContent = 'Uploading...';
       messageDiv.className = '';
 
       try {
         const response = await fetch('/upload', {
           method: 'POST',
-<<<<<<< HEAD
-=======
           headers: {
             'Authorization': 'Bearer ' + getToken()
           },
->>>>>>> 7257c02 (Version-2)
           body: formData
         });
 
@@ -355,17 +337,11 @@
     });
 
     async function loadFiles() {
-<<<<<<< HEAD
-=======
       if (!ensureAuthOrRedirect()) return;
->>>>>>> 7257c02 (Version-2)
       const filesList = document.getElementById('filesList');
       filesList.innerHTML = '<div class="loading">Loading files...</div>';
 
       try {
-<<<<<<< HEAD
-        const response = await fetch('/api/files');
-=======
         const url = new URL('/api/files', window.location.origin);
         if (currentFolderId) {
           url.searchParams.set('folderId', currentFolderId);
@@ -375,7 +351,6 @@
             'Authorization': 'Bearer ' + getToken()
           }
         });
->>>>>>> 7257c02 (Version-2)
         
         const contentType = response.headers.get('content-type');
         let data;
@@ -399,12 +374,9 @@
                     <div class="file-name">${folder.name}</div>
                     <div class="file-size">Folder</div>
                   </div>
-<<<<<<< HEAD
-=======
                   <div class="file-actions">
                     <button class="btn-secondary" onclick="openFolder('${folder.id}', '${folder.name}')">Open</button>
                   </div>
->>>>>>> 7257c02 (Version-2)
                 </div>
               `;
             });
@@ -433,10 +405,7 @@
           }
 
           filesList.innerHTML = html;
-<<<<<<< HEAD
-=======
           updatePathLabel();
->>>>>>> 7257c02 (Version-2)
         } else {
           filesList.innerHTML = `<div class="error">Error: ${data.error}</div>`;
         }
@@ -446,19 +415,12 @@
     }
 
     function downloadFile(fileId, fileName) {
-<<<<<<< HEAD
-      window.open(`/api/download/${fileId}`, '_blank');
-    }
-
-    async function createFolder() {
-=======
       const token = getToken();
       window.open(`/api/download/${fileId}?token=${encodeURIComponent(token)}`, '_blank');
     }
 
     async function createFolder() {
       if (!ensureAuthOrRedirect()) return;
->>>>>>> 7257c02 (Version-2)
       const folderName = document.getElementById('folderName').value.trim();
       if (!folderName) {
         alert('Enter folder name');
@@ -469,16 +431,10 @@
         const response = await fetch('/api/folder', {
           method: 'POST',
           headers: {
-<<<<<<< HEAD
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ name: folderName })
-=======
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + getToken()
           },
           body: JSON.stringify({ name: folderName, parentId: currentFolderId || undefined })
->>>>>>> 7257c02 (Version-2)
         });
 
         const contentType = response.headers.get('content-type');
@@ -504,10 +460,7 @@
     }
 
     async function createFolderFromTab() {
-<<<<<<< HEAD
-=======
       if (!ensureAuthOrRedirect()) return;
->>>>>>> 7257c02 (Version-2)
       const folderName = document.getElementById('newFolderName').value.trim();
       const messageDiv = document.getElementById('folderMessage');
       
@@ -521,16 +474,10 @@
         const response = await fetch('/api/folder', {
           method: 'POST',
           headers: {
-<<<<<<< HEAD
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ name: folderName })
-=======
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + getToken()
           },
           body: JSON.stringify({ name: folderName, parentId: currentFolderId || undefined })
->>>>>>> 7257c02 (Version-2)
         });
 
         const contentType = response.headers.get('content-type');
@@ -557,8 +504,6 @@
         messageDiv.className = 'error';
       }
     }
-<<<<<<< HEAD
-=======
     function openFolder(folderId, folderName) {
       currentFolderId = folderId;
       currentPathNames.push(folderName);
@@ -569,7 +514,6 @@
       currentPathNames = ['Root'];
       loadFiles();
     }
->>>>>>> 7257c02 (Version-2)
 
     function formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes';
@@ -580,8 +524,6 @@
     }
 
     window.addEventListener('load', () => {
-<<<<<<< HEAD
-=======
       // Initialize auth UI
       const email = getEmail();
       if (email) {
@@ -624,7 +566,6 @@
         window.location.href = '/login.html';
         return;
       }
->>>>>>> 7257c02 (Version-2)
       if (document.getElementById('files-tab').classList.contains('active')) {
         loadFiles();
       }

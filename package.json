@@ -1,6 +1,9 @@
 {
   "name": "my-mega-upload",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=18.x"
+  },
   "dependencies": {
     "express": "^4.21.2",
     "formidable": "^2.1.5",
