@@ -1,0 +1,84 @@
+body{
+     margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: url('image.png') no-repeat center center;
+    background-size: cover;
+
+   
+    position: relative;
+    
+   
+
+}
+h2{
+    font-family: 'Roboto', bold;
+    color: black;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+#email{
+        font-family: 'Roboto', bold;
+
+    font-size: 1.5rem;
+}
+#password{
+        font-family: 'Roboto', bold;
+
+    font-size: 1.5rem;
+}
+.container{
+    justify-content: center;
+    text-align: center;
+}
+.emailt, .passwordt{
+        font-family: 'Roboto', bold;
+
+    font-size: 1.5rem;
+}
+
+label, input {
+
+    display: block; 
+    margin-left: auto;
+    margin-right: auto;
+}
+.submit{
+        font-family: 'Roboto', bold;
+
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    padding: 0.5rem 1rem;
+    background-color: rgb(255, 0, 0);
+    border: none;
+    border-radius: 5px;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+}
+
+.container{
+    background-color: rgba(255, 255, 255, 0.712);
+    padding: 2rem;
+    width: 350px;
+    height: 400px;
+    color: black;
+}
+
+.submit:hover{
+    background-color: rgb(200, 0, 0);
+    border:1px solid black;
+    transform: scale(1.1);
+}
+
+.password:hover{
+    border: 0.5px solid rgb(202, 3, 3);
+}
+
+.email:hover{
+    border: 0.5px solid rgb(202, 3, 3);
+}

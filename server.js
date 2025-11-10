@@ -17,12 +17,50 @@ const app = express();
 
 app.use(express.json());
 
+<<<<<<< HEAD
 async function getStorage() {
     return new Promise((resolve, reject) => {
         try {
             const storage = new Storage({
                 email: 'Login',
                 password: 'password'
+=======
+// In-memory token store (for demo purposes). In production, use a DB/session manager.
+const tokenToCredentials = new Map();
+
+function generateToken() {
+    return crypto.randomBytes(24).toString('hex');
+}
+
+function getCredentialsFromRequest(req) {
+    // Authorization: Bearer <token>
+    const authHeader = req.headers['authorization'] || '';
+    const parts = authHeader.split(' ');
+    let token = '';
+    if (parts.length === 2 && parts[0] === 'Bearer') {
+        token = parts[1];
+    }
+    // Fallback: token in query (for file downloads via window.open)
+    if (!token && req.query && req.query.token) {
+        token = String(req.query.token);
+    }
+    if (!token) {
+        return null;
+    }
+    return tokenToCredentials.get(token) || null;
+}
+
+async function getStorage(req) {
+    const creds = getCredentialsFromRequest(req);
+    if (!creds) {
+        throw new Error('Unauthorized: missing or invalid token');
+    }
+    return new Promise((resolve, reject) => {
+        try {
+            const storage = new Storage({
+                email: creds.email,
+                password: creds.password
+>>>>>>> 7257c02 (Version-2)
             });
             
             storage.ready.then(() => {
@@ -35,10 +73,60 @@ async function getStorage() {
     });
 }
 
+<<<<<<< HEAD
 app.get('/api/files', async (req, res) => {
     try {
         const storage = await getStorage();
         const root = storage.root;
+=======
+function findNodeById(rootNode, targetId) {
+    if (!rootNode) return null;
+    if (rootNode.nodeId === targetId) return rootNode;
+    const children = rootNode.children || [];
+    for (const child of children) {
+        if (child.nodeId === targetId) return child;
+        if (child.directory) {
+            const found = findNodeById(child, targetId);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+// Login endpoint: verifies MEGA credentials and issues a token
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body || {};
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        // Try to connect with provided credentials
+        const storage = new Storage({ email, password });
+        await storage.ready;
+        // If connected, issue token and cache credentials
+        const token = generateToken();
+        tokenToCredentials.set(token, { email, password });
+        // Optionally, clean up storage instance (we reconnect per request)
+        res.json({ token, email });
+    } catch (error) {
+        console.error('Login failed:', error);
+        res.status(401).json({ error: 'Invalid email or password' });
+    }
+});
+
+app.get('/api/files', async (req, res) => {
+    try {
+        const storage = await getStorage(req);
+        const root = storage.root;
+        const folderId = req.query.folderId ? String(req.query.folderId) : '';
+        const container = folderId ? findNodeById(root, folderId) : root;
+        if (!container) {
+            return res.status(404).json({ error: 'Folder not found' });
+        }
+        if (!container.directory) {
+            return res.status(400).json({ error: 'Not a folder' });
+        }
+>>>>>>> 7257c02 (Version-2)
         
         const files = [];
         const folders = [];
@@ -64,7 +152,11 @@ app.get('/api/files', async (req, res) => {
             }
         }
         
+<<<<<<< HEAD
         const children = root.children || [];
+=======
+        const children = container.children || [];
+>>>>>>> 7257c02 (Version-2)
         
         for (const node of children) {
             processNode(node);
@@ -73,18 +165,32 @@ app.get('/api/files', async (req, res) => {
         res.json({ files, folders });
     } catch (error) {
         console.error('Error getting file list:', error);
+<<<<<<< HEAD
+=======
+        if (String(error.message).startsWith('Unauthorized')) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+>>>>>>> 7257c02 (Version-2)
         res.status(500).json({ error: error.message });
     }
 });
 
 app.get('/api/download/:fileId', async (req, res) => {
     try {
+<<<<<<< HEAD
         const storage = await getStorage();
         const root = storage.root;
         const fileId = req.params.fileId;
         
         const children = root.children || [];
         const file = children.find(node => node.nodeId === fileId);
+=======
+        const storage = await getStorage(req);
+        const root = storage.root;
+        const fileId = req.params.fileId;
+        
+        const file = findNodeById(root, fileId);
+>>>>>>> 7257c02 (Version-2)
         
         if (!file || file.directory) {
             return res.status(404).send('File not found');
@@ -110,22 +216,46 @@ app.get('/api/download/:fileId', async (req, res) => {
         });
     } catch (error) {
         console.error('File download error:', error);
+<<<<<<< HEAD
+=======
+        if (String(error.message).startsWith('Unauthorized')) {
+            return res.status(401).send('Unauthorized');
+        }
+>>>>>>> 7257c02 (Version-2)
         res.status(500).send('File download error: ' + error.message);
     }
 });
 
 app.post('/api/folder', async (req, res) => {
     try {
+<<<<<<< HEAD
         const { name } = req.body;
+=======
+        const { name, parentId } = req.body;
+>>>>>>> 7257c02 (Version-2)
         
         if (!name) {
             return res.status(400).json({ error: 'Folder name is required' });
         }
         
+<<<<<<< HEAD
         const storage = await getStorage();
         const root = storage.root;
         
         const folder = await root.mkdir(name);
+=======
+        const storage = await getStorage(req);
+        const root = storage.root;
+        let parent = root;
+        if (parentId) {
+            const node = findNodeById(root, String(parentId));
+            if (!node) return res.status(404).json({ error: 'Parent folder not found' });
+            if (!node.directory) return res.status(400).json({ error: 'Parent is not a folder' });
+            parent = node;
+        }
+        
+        const folder = await parent.mkdir(name);
+>>>>>>> 7257c02 (Version-2)
         
         res.json({ 
             success: true, 
@@ -138,11 +268,29 @@ app.post('/api/folder', async (req, res) => {
         });
     } catch (error) {
         console.error('Error creating folder:', error);
+<<<<<<< HEAD
+=======
+        if (String(error.message).startsWith('Unauthorized')) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+>>>>>>> 7257c02 (Version-2)
         res.status(500).json({ error: error.message });
     }
 });
 
 app.post('/upload', async (req, res) => {
+<<<<<<< HEAD
+=======
+    // Check auth before parsing large body
+    try {
+        const creds = getCredentialsFromRequest(req);
+        if (!creds) {
+            return res.status(401).send('Unauthorized');
+        }
+    } catch (e) {
+        return res.status(401).send('Unauthorized');
+    }
+>>>>>>> 7257c02 (Version-2)
     const form = new formidable.IncomingForm({
         maxFileSize: 100 * 1024 * 1024 * 1024,
         keepExtensions: true
@@ -161,6 +309,11 @@ app.post('/upload', async (req, res) => {
 
         const filePath = Array.isArray(file) ? file[0].filepath : file.filepath;
         const fileName = Array.isArray(file) ? file[0].originalFilename : file.originalFilename;
+<<<<<<< HEAD
+=======
+        const folderIdRaw = fields.folderId;
+        const folderId = Array.isArray(folderIdRaw) ? String(folderIdRaw[0]) : (folderIdRaw ? String(folderIdRaw) : '');
+>>>>>>> 7257c02 (Version-2)
 
         if (!filePath || !fs.existsSync(filePath)) {
             return res.status(400).send('File not found on server');
@@ -168,7 +321,11 @@ app.post('/upload', async (req, res) => {
 
         try {
             console.log('Connecting to MEGA...');
+<<<<<<< HEAD
             const storage = await getStorage();
+=======
+            const storage = await getStorage(req);
+>>>>>>> 7257c02 (Version-2)
 
             console.log('Getting file info:', fileName);
             const stats = await fs.promises.stat(filePath);
@@ -179,7 +336,24 @@ app.post('/upload', async (req, res) => {
             
             const fileBuffer = await fs.promises.readFile(filePath);
             
+<<<<<<< HEAD
             const upload = storage.upload({
+=======
+            // Choose destination: specified folder or root
+            let destination = storage;
+            if (folderId) {
+                const parentNode = findNodeById(storage.root, folderId);
+                if (!parentNode) {
+                    console.warn('Specified folder not found, uploading to root');
+                } else if (!parentNode.directory) {
+                    console.warn('Specified node is not a folder, uploading to root');
+                } else {
+                    destination = parentNode;
+                }
+            }
+
+            const upload = destination.upload({
+>>>>>>> 7257c02 (Version-2)
                 name: fileName,
                 size: fileSize,
                 allowUploadBuffering: true
@@ -220,6 +394,11 @@ app.post('/upload', async (req, res) => {
     });
 });
 
+<<<<<<< HEAD
+=======
+// Serve static: login page at root and app under /public
+app.use(express.static('.'));
+>>>>>>> 7257c02 (Version-2)
 app.use(express.static('public'));
 
 const PORT = 3000;
